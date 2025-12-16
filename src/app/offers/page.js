@@ -246,7 +246,7 @@ const OffersPage = () => {
       key: "reason",
       header: "Reason",
       maxWidth: "300px",
-      render: (row) => row?.OfferRequestRejectDetails?.reason || "-",
+      render: (row) => row.is_blocked ? row?.blocked_reason : row.status === "rejected" ? row?.OfferRequestRejectDetails?.reason : "-",
     },
     {
       key: "start_date",

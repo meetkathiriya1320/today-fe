@@ -1,6 +1,7 @@
 "use client";
 
 import ActionButton from "@/components/actionButton";
+import AddOfferModal from "@/components/admin/AddOfferModal";
 import Button from "@/components/button";
 import ConfirmationModal from "@/components/confirmationModal";
 import Input from "@/components/input";
@@ -10,12 +11,13 @@ import SectionHeader from "@/components/sectionHeader";
 import StatusChip from "@/components/statusChip";
 import Table from "@/components/table";
 import useDebounce from "@/hooks/useDebounce";
-import { getResponse, putResponse, deleteResponse } from "@/lib/response";
-import { constructQueryParams } from "@/utils/constructQueryParams";
-import { CheckCircle, CircleX, Plus, Trash2, Edit, Eye, EyeOff, MapPin, Calendar, Building2, User, Tag, ExternalLink, Shield, ShieldX } from "lucide-react";
-import { useEffect, useState } from "react";
-import AddOfferModal from "@/components/admin/AddOfferModal";
 import useSocket from "@/hooks/useSocket";
+import { deleteResponse, getResponse, putResponse } from "@/lib/response";
+import { constructQueryParams } from "@/utils/constructQueryParams";
+import { Building2, Calendar, CheckCircle, CircleX, Edit, Eye, MapPin, Plus, Shield, ShieldX, Tag, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+
+const no_image = "/assets/noImage.png";
 
 const AdminOfferManagementPage = () => {
   const socket = useSocket()
@@ -60,7 +62,7 @@ const AdminOfferManagementPage = () => {
       header: "Image",
       render: (row) => (
         <img
-          src={row?.OfferImage?.image || "/placeholder-image.png"}
+          src={row?.OfferImage?.image || no_image}
           alt="Offer"
           className="w-16 h-10 object-cover rounded border cursor-pointer hover:opacity-80 transition-opacity"
           onClick={() => openImageModal(row?.OfferImage?.image, row?.offer_title)}
@@ -104,7 +106,7 @@ const AdminOfferManagementPage = () => {
       key: "reason",
       header: "Reason",
       maxWidth: "250px",
-      render: (row) => row?.OfferRequestRejectDetails?.reason || "-",
+      render: (row) => row.is_blocked ? row?.blocked_reason : row.status === "rejected" ? row?.OfferRequestRejectDetails?.reason : "-",
     },
     {
       key: "start_date",
@@ -133,7 +135,7 @@ const AdminOfferManagementPage = () => {
     {
       key: "status",
       header: "Status",
-      render: (row) => <StatusChip status={row?.status} />,
+      render: (row) => <StatusChip status={row?.is_blocked ? "Blocked" : row?.status} />,
     },
     {
       key: "is_active",
@@ -145,20 +147,6 @@ const AdminOfferManagementPage = () => {
             : 'bg-red-100 text-red-800'
             }`}>
             {row?.is_active ? 'Active' : 'Inactive'}
-          </span>
-        </div>
-      ),
-    },
-    {
-      key: "is_blocked",
-      header: "Blocked",
-      render: (row) => (
-        <div className="flex items-center justify-center">
-          <span className={`px-2 py-1 text-xs font-medium rounded-full ${row?.is_blocked
-            ? 'bg-red-100 text-red-800'
-            : 'bg-gray-100 text-gray-800'
-            }`}>
-            {row?.is_blocked ? 'Blocked' : 'Not Blocked'}
           </span>
         </div>
       ),
@@ -423,10 +411,6 @@ const AdminOfferManagementPage = () => {
       });
 
       if (response.successType) {
-        const notificationData = response.response.data.notifications
-        socket.emit("send-notification-to-business-owner", {
-          ...notificationData
-        });
         setBlockModalOpen(false);
         setSelectedOffer(null);
         setBlockReason("");
@@ -534,9 +518,9 @@ const AdminOfferManagementPage = () => {
               {/* Offer Image */}
               <div className="flex justify-center">
                 <img
-                  src={selectedOffer?.OfferImage?.image || "/placeholder-image.png"}
+                  src={selectedOffer?.OfferImage?.image || no_image}
                   alt={selectedOffer?.offer_title}
-                  className="w-48 h-32 object-cover rounded-lg border border-gray-200"
+                  className="w-48 h-32  object-contain rounded-lg border border-gray-200"
                 />
               </div>
 
@@ -705,7 +689,8 @@ const AdminOfferManagementPage = () => {
           open={approveModalOpen}
           onCancel={() => setApproveModalOpen(false)}
           title="Approve Offer"
-          message={`Are you sure you want to approve the offer "${selectedOffer?.offer_title || ""}" from "${selectedOffer?.Business?.business_name || ""}"?`}
+          message={`Are you sure you want to approve the offer "${selectedOffer?.offer_title || ""
+            }" from "${selectedOffer?.Business?.business_name || ""}"?`}
           confirmButtonLabel="Approve"
           confirmButtonVariant="primary"
           onConfirm={handleApproveOffer}
@@ -724,7 +709,9 @@ const AdminOfferManagementPage = () => {
           <div className="space-y-4">
             <div>
               <p className="text-sm text-gray-600 mb-4">
-                {`Please provide a reason for rejecting the offer "${selectedOffer?.offer_title || ""}" from "${selectedOffer?.Branch?.Business?.business_name || ""}":`}
+                Please provide a reason for rejecting the offer "
+                {selectedOffer?.offer_title || ""}" from "
+                {selectedOffer?.Branch?.Business?.business_name || ""}":
               </p>
               <Input
                 isTextarea={true}
@@ -766,7 +753,8 @@ const AdminOfferManagementPage = () => {
           open={deleteModalOpen}
           onCancel={() => setDeleteModalOpen(false)}
           title="Delete Offer"
-          message={`Are you sure you want to delete the offer "${selectedOffer?.offer_title || ""}"? This action cannot be undone.`}
+          message={`Are you sure you want to delete the offer "${selectedOffer?.offer_title || ""
+            }"? This action cannot be undone.`}
           confirmButtonLabel="Delete"
           confirmButtonVariant="danger"
           onConfirm={handleDeleteOffer}
