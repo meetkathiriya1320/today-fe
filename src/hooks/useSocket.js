@@ -15,7 +15,7 @@ export default function useSocket() {
 
         if (!socketRef.current) {
             socketRef.current = io(
-                process.env.NEXT_SOCKET_URL || "http://localhost:4000",
+                process.env.NEXT_SOCKET_URL || "https://today-production-c074.up.railway.app",
                 {
                     extraHeaders: {
                         Token: token,
