@@ -349,7 +349,11 @@ const LoginPage = () => {
                                             onChange={() => setSelectedRole(role.id)}
                                             className="mr-3 accent-[var(--color-secondary)]"
                                         />
-                                        <span className="text-sm font-medium text-[var(--color-text-primary)]">{role.name}</span>
+                                        <span className="text-sm font-medium text-[var(--color-text-primary)]">{role.name
+                                            .split("_")
+                                            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                                            .join(" ")
+                                        }</span>
                                     </label>
                                 ))}
                                 <div className="flex justify-end gap-3">

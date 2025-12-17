@@ -365,7 +365,7 @@ const AdvertiseRequestModal = ({
                 {({ field, meta }) => (
                   <Input
                     label="Start Date"
-                    min={new Date().toISOString().split("T")[0]}
+                    min={!isEdit ? new Date().toISOString().split("T")[0] : undefined}
                     required
                     type="date"
                     {...field}
@@ -379,7 +379,7 @@ const AdvertiseRequestModal = ({
                 {({ field, meta }) => (
                   <Input
                     label="End Date"
-                    min={new Date().toISOString().split("T")[0]}
+                    min={!isEdit ? new Date().toISOString().split("T")[0] : undefined}
                     type="date"
                     required
                     {...field}

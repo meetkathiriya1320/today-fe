@@ -41,7 +41,6 @@ const validationSchema = Yup.object({
   branch_id: Yup.string().required("Branch is required"),
   start_date: Yup.date().required("Start date is required"),
   end_date: Yup.date()
-    .required("End date is required")
     .min(Yup.ref("start_date"), "End date must be after start date"),
   keywords: Yup.array()
     .of(Yup.string())
@@ -547,10 +546,13 @@ const OffersPage = () => {
                 "start_date",
                 new Date(values.start_date).toISOString()
               );
-              formData.append(
-                "end_date",
-                new Date(values.end_date).toISOString()
-              );
+              if (values.end_date) {
+                formData.append(
+                  "end_date",
+                  new Date(values.end_date).toISOString()
+                );
+              }
+
               formData.append("keywords", JSON.stringify(values.keywords));
               formData.append("is_active", values.is_active ? "1" : "0");
 
@@ -715,7 +717,7 @@ const OffersPage = () => {
                   {({ field, meta }) => (
                     <Input
                       label="Start Date"
-                      min={new Date().toISOString().split("T")[0]}
+                      min={!editMode ? new Date().toISOString().split("T")[0] : undefined}
                       type="date"
                       {...field}
                       error={meta.touched && meta.error ? meta.error : ""}
@@ -729,7 +731,7 @@ const OffersPage = () => {
                     <Input
                       label="End Date"
                       type="date"
-                      min={new Date().toISOString().split("T")[0]}
+                      min={!editMode ? new Date().toISOString().split("T")[0] : undefined}
                       {...field}
                       error={meta.touched && meta.error ? meta.error : ""}
                       startIcon={<Calendar size={18} />}

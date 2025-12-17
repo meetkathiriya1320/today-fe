@@ -14,7 +14,6 @@ import { Calendar, FileText, Tag } from "lucide-react";
 import useSocket from "@/hooks/useSocket";
 
 const validationSchema = Yup.object({
-  image: Yup.mixed().required("Offer image is required"),
   offer_title: Yup.string().required("Offer title is required"),
   business_id: Yup.string().required("Business is required"),
   short_description: Yup.string().required("Short description is required"),
@@ -22,7 +21,6 @@ const validationSchema = Yup.object({
   branch_id: Yup.string().required("Branch is required"),
   start_date: Yup.date().required("Start date is required"),
   end_date: Yup.date()
-    .required("End date is required")
     .min(Yup.ref("start_date"), "End date must be after start date"),
   keywords: Yup.array()
     .of(Yup.string())
@@ -150,7 +148,9 @@ const AddOfferModal = ({
       formData.append("short_description", values.short_description);
       formData.append("full_description", values.full_description);
       formData.append("start_date", new Date(values.start_date).toISOString());
-      formData.append("end_date", new Date(values.end_date).toISOString());
+      if (values.end_date) {
+        formData.append("end_date", new Date(values.end_date).toISOString());
+      }
       formData.append("keywords", JSON.stringify(values.keywords));
       formData.append("is_active", values.is_active);
 
@@ -394,7 +394,8 @@ const AddOfferModal = ({
                 {({ field, meta }) => (
                   <Input
                     label="Start Date"
-                    min={new Date().toISOString().split("T")[0]}
+                    min={!editMode ? new Date().toISOString().split("T")[0] : undefined}
+
                     type="date"
                     {...field}
                     error={meta.touched && meta.error ? meta.error : ""}
@@ -408,7 +409,8 @@ const AddOfferModal = ({
                   <Input
                     label="End Date"
                     type="date"
-                    min={new Date().toISOString().split("T")[0]}
+                    min={!editMode ? new Date().toISOString().split("T")[0] : undefined}
+
                     {...field}
                     error={meta.touched && meta.error ? meta.error : ""}
                     startIcon={<Calendar size={18} />}
