@@ -3,20 +3,26 @@
 import Button from "@/components/button";
 import Input from "@/components/input";
 import LoadingSpinner from "@/components/loadingSpinner";
+import MapPreview from "@/components/mapPreview";
 import Modal from "@/components/modal";
 import { getRequest, postRequest } from "@/lib/axiosClient";
 import { setBreeadCrumb } from "@/store/slices/userSlice";
-import { getCurrentUserCookie } from "@/utils/cookieUtils";
+import { getCookieItem, getCurrentUserCookie } from "@/utils/cookieUtils";
 import { Calendar, House } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
+
+const no_image = "/assets/no_image_banner.png";
+
 
 const OfferDetails = ({ params }) => {
 
     const { id } = React.use(params)
 
     const isLoggedIn = getCurrentUserCookie()
+    // const user_lat_lon = getCookieItem("user_lat_lon");
+
     const [isModelOpen, setIsModelOpen] = useState("");
     const [reportNote, setReportNote] = useState("")
 
@@ -58,8 +64,6 @@ const OfferDetails = ({ params }) => {
     }, [id]);
 
 
-    if (loading) return <LoadingSpinner />;
-
     const {
         offer_title,
         short_description,
@@ -70,17 +74,14 @@ const OfferDetails = ({ params }) => {
         Category,
         Branch,
         OfferImage,
-    } = offerItem;
+    } = offerItem || {};
 
     // open map funcation
     const handleOpenMap = () => {
 
-        const latitude = Branch.latitude;
-        const longitude = Branch.longitude;
-
-        const googleMapsUrl = `https://www.google.com/maps/dir/Current+Location/${latitude},${longitude}`;
-
-        window.open(googleMapsUrl, "_blank");
+        const business_latitude = Branch.latitude;
+        const business_longitude = Branch.longitude;
+        openGoogleMapUsingLocData({ business_latitude, business_longitude });
     }
 
     // report offer funcation 
@@ -131,13 +132,13 @@ const OfferDetails = ({ params }) => {
                             <div className="w-[5px] rounded-[3px] bg-[var(--color-secondary)] me-2" />
                             <div>
                                 <h2 className="text-2xl font-semibold">{`${Branch?.Business?.business_name} (${Branch?.branch_name})`}</h2>
-                                <p className="text-gray-500 mb-4">{Branch?.location}</p>
+                                <p className="text-gray-500 mb-2 sm:mb-4">{Branch?.location}</p>
                             </div>
                         </div>
 
                         {/* Banner Image */}
                         <img
-                            src={OfferImage?.image}
+                            src={OfferImage?.image || no_image}
                             alt="offer banner"
                             className="w-full h-[250px] sm:h-[350px] md:h-[450px] lg:h-[512px] rounded-[20px] object-cover"
                         />
@@ -163,7 +164,7 @@ const OfferDetails = ({ params }) => {
 
                             {/* Valid Offer Duration */}
                             <div className="w-full lg:w-auto">
-                                <h4 className="text-[20px] md:text-[22px] font-[600] mb-4">Valid Offer Duration</h4>
+                                <h4 className="text-[18px] sm:text-[20px] md:text-[22px] font-[600] mb-2 sm:mb-4">Valid Offer Duration</h4>
 
                                 <div className="p-5 bg-[var(--color-primary)] rounded-[20px] 
                         border border-[var(--muted-green)]">
@@ -171,15 +172,15 @@ const OfferDetails = ({ params }) => {
                                     <div className="flex flex-row md:items-center mb-5">
 
                                         {/* Calendar Icon + Start Date */}
-                                        <div className="flex items-center mb-4 md:mb-0">
+                                        <div className="flex items-center mb-2 sm:mb-4 md:mb-0">
                                             <div className="bg-[var(--muted-green)] flex justify-center items-center 
-                                    rounded-[10px] p-3 me-3">
+                                    rounded-[10px] p-1 sm:p-3 me-2 sm:me-3">
                                                 <Calendar className="text-[var(--color-secondary)]" />
                                             </div>
 
                                             <div>
                                                 <p className="text-[14px] text-[var(--color-text-muted)]">Start Date</p>
-                                                <p className="font-medium text-[16px] md:text-[18px]">
+                                                <p className="font-medium text-[12px] sm:text-[16px] md:text-[18px]">
                                                     {new Date(start_date).toLocaleDateString()}
                                                 </p>
                                             </div>
@@ -191,16 +192,17 @@ const OfferDetails = ({ params }) => {
                                         {/* End Date */}
                                         <div>
                                             <p className="text-[14px] text-[var(--color-text-muted)]">End Date</p>
-                                            <p className="font-medium text-[16px] md:text-[18px]">
+                                            <p className="font-medium text-[12px] sm:text-[16px] md:text-[18px]">
                                                 {new Date(end_date).toLocaleDateString()}
                                             </p>
                                         </div>
                                     </div>
 
-                                    <Button label="View Location" className="w-full" onClick={() => handleOpenMap()} />
+                                    <Button label="View Location" className="w-full" onClick={(e) => handleOpenMap(e)} />
                                     <Button label="Report Offer" className="w-full mt-3" variant="outline" onClick={handleReportOffer} />
 
                                 </div>
+                                <MapPreview business_lat={Branch.latitude} business_lng={Branch.longitude} />
                             </div>
 
                         </div>
@@ -209,7 +211,7 @@ const OfferDetails = ({ params }) => {
                         <div className="h-[1px] bg-[var(--divider-line)] w-full lg:w-[70%] my-5" />
 
                         {/* Business Details + Tags */}
-                        <div className="mt-8 flex flex-col lg:flex-row gap-10">
+                        <div className="mt-4 sm:mt-8 flex flex-col lg:flex-row gap-4 sm:gap-10">
 
                             {/* Business Details */}
                             <div className="w-full lg:w-[70%]">
@@ -229,14 +231,14 @@ const OfferDetails = ({ params }) => {
 
                                 </div>
 
-                                <p className="text-[var(--color-text-muted)] break-all text-[14px] md:text-[16px] mt-4">
+                                <p className="text-[var(--color-text-muted)] break-all text-[14px] md:text-[16px] mt-2 sm:mt-4">
                                     {full_description}
                                 </p>
                             </div>
 
                             {/* Tags */}
                             <div className="w-full lg:w-auto">
-                                <h4 className="text-[20px] md:text-[22px] font-[600] mb-4">Tags</h4>
+                                <h4 className="text-[20px] md:text-[22px] font-[600] mb-2 sm:mb-4">Tags</h4>
                                 <div className="flex flex-wrap gap-1 md:gap-2">
 
                                     {keywords.map((item, index) => (
@@ -257,6 +259,7 @@ const OfferDetails = ({ params }) => {
                     </div>
 
             }
+
             <Modal title="Report Offer" open={isModelOpen === "report"} closeModal={handleClose}>
 
                 <Input
@@ -278,3 +281,49 @@ const OfferDetails = ({ params }) => {
 };
 
 export default OfferDetails;
+
+export function openGoogleMapUsingLocData({
+    business_latitude,
+    business_longitude
+}) {
+    if (!navigator.geolocation) {
+        // Geolocation not supported
+        const url = `https://www.google.com/maps/dir/?api=1&destination=${business_latitude},${business_longitude}`;
+        window.open(url, "_blank");
+        return;
+    }
+
+    navigator.permissions.query({ name: "geolocation" })
+        .then(({ state }) => {
+
+            // ❌ Permission blocked
+            if (state === "denied") {
+                const url = `https://www.google.com/maps/dir/?api=1&destination=${business_latitude},${business_longitude}`;
+                window.open(url, "_blank");
+                return;
+            }
+
+            // ✅ Allowed or first-time → get user location
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const url = `https://maps.google.com/?saddr=${pos.coords.latitude},${pos.coords.longitude}&daddr=${business_latitude},${business_longitude}`;
+                    window.open(url, "_blank");
+                },
+                (err) => {
+                    // ⚠️ Any error → fallback to business location
+                    const url = `https://www.google.com/maps/dir/?api=1&destination=${business_latitude},${business_longitude}`;
+                    window.open(url, "_blank");
+                    console.error("Location error:", err.message);
+                },
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+
+            );
+        })
+        .catch((err) => {
+            // Permissions API failed → fallback
+            const url = `https://www.google.com/maps/dir/?api=1&destination=${business_latitude},${business_longitude}`;
+            window.open(url, "_blank");
+            console.error("Permission check error:", err);
+        });
+}
+

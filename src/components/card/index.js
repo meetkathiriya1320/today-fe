@@ -1,23 +1,21 @@
 "use client";
+import { openGoogleMapUsingLocData } from "@/app/(user)/user/offer-details/[id]/page";
 import { MapPin } from "lucide-react";
+import { useRouter } from "next/navigation";
 import Button from "../button";
 import ImageCarousel from "../carousel";
-import AnalyticsCount from "../analyticsCount";
-import { useRouter } from "next/navigation";
 
 const ShopCard = ({ shop }) => {
 
   const { id, offer_title, short_description, Branch, OfferImage } = shop;
 
-  const handleOpenMap = () => {
+  const handleOpenMap = (e) => {
     if (!Branch || !Branch.latitude || !Branch.longitude) return;
-
-    const latitude = Branch.latitude;
-    const longitude = Branch.longitude;
-
-    const googleMapsUrl = `https://www.google.com/maps/dir/Current+Location/${latitude},${longitude}`;
-
-    window.open(googleMapsUrl, "_blank");
+    e.stopPropagation();
+    e.preventDefault();
+    const business_latitude = Branch.latitude;
+    const business_longitude = Branch.longitude;
+    openGoogleMapUsingLocData({ business_latitude, business_longitude });
   }
 
   const router = useRouter()
@@ -26,7 +24,7 @@ const ShopCard = ({ shop }) => {
   const validImages = OfferImage && typeof OfferImage === 'object' && OfferImage.image ? [OfferImage] : [];
 
   return (
-    <div className="shadow-lg bg-[var(--color-primary)] justify-between border border-[#69937C33] border-[1px] p-4 rounded-[20px] overflow-hidden transition-transform hover:scale-[1.02] hover:shadow-xl duration-300 w-full flex flex-col">
+    <div onClick={() => router.push(`/user/offer-details/${id}`)} className="shadow-lg cursor-pointer bg-[var(--color-primary)] justify-between border border-[#69937C33] border-[1px] p-4 rounded-[20px] overflow-hidden transition-transform hover:scale-[1.02] hover:shadow-xl duration-300 w-full flex flex-col">
       {/* Image Slider */}
       <div>
         <div className="relative">
@@ -53,7 +51,7 @@ const ShopCard = ({ shop }) => {
         <Button
           label="View Details"
           fullWidth
-          onClick={() => router.push(`/user/offer-details/${id}`)}
+
         />
         <div className="bg-white border border-[var(--color-secondary)] cursor-pointer p-2 rounded" onClick={handleOpenMap} >
           <MapPin size={18} className="text-[var(--color-secondary)]" />

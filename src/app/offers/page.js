@@ -6,6 +6,7 @@ import Input from "@/components/input";
 import Modal from "@/components/modal";
 import MultiDatePicker from "@/components/multiDatePicker";
 import ProfileImageUploader from "@/components/profileImageUploader";
+import SectionHeader from "@/components/sectionHeader";
 import StatusChip from "@/components/statusChip";
 import Table from "@/components/table";
 import useDebounce from "@/hooks/useDebounce";
@@ -246,7 +247,7 @@ const OffersPage = () => {
       key: "reason",
       header: "Reason",
       maxWidth: "300px",
-      render: (row) => row?.OfferRequestRejectDetails?.reason || "-",
+      render: (row) => row.is_blocked ? row?.blocked_reason : row.status === "rejected" ? row?.OfferRequestRejectDetails?.reason : "-",
     },
     {
       key: "start_date",
@@ -407,9 +408,11 @@ const OffersPage = () => {
   return (
     <>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">
-          Offers
-        </h1>
+
+        <SectionHeader
+          title="Offers"
+          mainHeader
+        />
 
         <Button
           label={editMode ? "Edit Offer" : "Add Offer"}

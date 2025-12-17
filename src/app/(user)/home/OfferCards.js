@@ -48,7 +48,7 @@ const OfferCards = () => {
             {offers.length === 0 ? (
                 <p className="text-center text-gray-500 text-lg">No offer available</p>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap:2 sm:gap-3 md:gap-4 xl:gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3 md:gap-4 xl:gap-6">
                     {offers.map((offer, index) => (
                         <ShopCard key={offer.id || index} shop={offer} />
                     ))}

@@ -1,6 +1,7 @@
 import { ChevronLeft, ChevronRight, X, ImageOff } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
+const no_image = "/assets/no_image_banner.png";
 
 const ImageCarousel = ({ images, alt = "carousel image", interval = 2000 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -31,12 +32,11 @@ const ImageCarousel = ({ images, alt = "carousel image", interval = 2000 }) => {
 
   if (!validImages.length) {
     return (
-      <div className="relative h-[200px] overflow-hidden rounded-xl bg-gray-200">
-        <div className="w-full h-full bg-gray-300 flex flex-col items-center justify-center">
-          <ImageOff className="w-12 h-12 text-gray-500 mb-2" />
-          <span className="text-gray-500">No images available</span>
-        </div>
-      </div>
+      <img
+        src={no_image}
+        alt={alt}
+        className="w-full h-[200px] object-cover transition-all duration-700 ease-in-out"
+      />
     );
   }
 

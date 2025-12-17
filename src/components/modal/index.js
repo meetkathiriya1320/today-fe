@@ -6,7 +6,6 @@ const Modal = ({
   title,
   open,
   closeModal,
-
   icon = true,
   children,
   width = "w-[500px]",
@@ -43,29 +42,6 @@ const Modal = ({
         onClick={handleOverlayClick}
         className="fixed inset-0 bg-[var(--color-bg)]/60 backdrop-blur-[4px] transition-opacity duration-300"
       />
-
-      {/* Outside Close Button - positioned outside the modal */}
-      {closeButtonOutside && (
-        <button
-          type="button"
-          disabled={isDisabled}
-          onClick={!isDisabled ? closeModal : undefined}
-          className={`fixed top-6 right-6 z-[60] transition-transform duration-200 ${isDisabled ? "opacity-50 cursor-default" : "hover:scale-110"
-            }`}
-          aria-label="Close modal"
-          style={{
-            position: 'fixed',
-            top: '24px',
-            right: '24px',
-            zIndex: 60
-          }}
-        >
-          <CircleX
-            size={32}
-            className="text-white drop-shadow-lg cursor-pointer hover:text-gray-200"
-          />
-        </button>
-      )}
 
       {/* Modal Wrapper */}
       <div

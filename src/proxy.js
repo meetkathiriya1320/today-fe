@@ -22,7 +22,7 @@ export function proxy(req) {
   }
 
   // If token exists & user tries to visit login/signup → redirect
-  if (token && (pathname === "/login" || pathname === "/sign-up")) {
+  if (token && (pathname === "/login")) {
     try {
       const user = JSON.parse(token);
       if (user.role === "admin") {

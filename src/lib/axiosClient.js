@@ -99,6 +99,7 @@ axiosClient.interceptors.response.use(
 // UNAUTHORIZED HANDLER
 // ==================================================
 export const unAuthorized = (router) => {
+
   Cookies.remove("current_user");
   router("/unauthorized");
 };
@@ -109,6 +110,7 @@ export const unAuthorized = (router) => {
 const commonErrorHandler = (error, router) => {
   const status = error?.response?.status;
   const message = error?.response?.data?.message;
+  console.log(status, STATUS_UNAUTHORIZED)
   if (status === STATUS_UNAUTHORIZED) {
     if (error.config?.url?.includes("/auth/login")) {
       toast.error(message || MESSAGE_INVALID_CREDENTIALS);
@@ -179,12 +181,16 @@ export const getRequest = async (
 };
 
 // ---------- POST ----------
-export const postRequest = async (URL, payload, router, type) => {
+export const postRequest = async (URL, payload, router, type, hideSuccessToast = false) => {
   if (isApiCallFailed) throw new Error(MESSAGE_API_CALL_FAILED);
 
   try {
     const res = await axiosClient.post(URL, payload, buildConfig(type));
-    if (res.data.success) toast.success(res.data.message);
+    if (res.data.success) {
+      if (!hideSuccessToast) {
+        toast.success(res.data.message);
+      }
+    }
     return {
       response: res.data,
       successType: res.data.success,

@@ -58,13 +58,15 @@ export async function postResponse({
   payload,
   navigate,
   type,
+  hideSuccessToast = false
 }) {
   try {
     const response = await postRequest(
       `${apiEndPoint}?${queryString}`,
       payload,
       navigate,
-      type
+      type,
+      hideSuccessToast
     );
     return response;
   } catch (err) {

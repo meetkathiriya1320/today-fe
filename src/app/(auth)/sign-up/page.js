@@ -16,7 +16,7 @@ const SignUpPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
   const [userEmail, setUserEmail] = useState("");
-  const [activeTab, setActiveTab] = useState("user"); // "user" or "business"
+  const [activeTab, setActiveTab] = useState("business"); // "user" or "business"
 
   // ✅ Yup validation schema
   const validationSchema = Yup.object({
@@ -99,16 +99,7 @@ const SignUpPage = () => {
           {/* Formik Form */}
           {/* Tab Navigation */}
           <div className="flex mb-6 border-b border-gray-200">
-            <button
-              type="button"
-              onClick={() => setActiveTab("user")}
-              className={`flex-1 py-3 px-4 text-base font-medium transition-all duration-200 relative ${activeTab === "user"
-                ? "text-[var(--color-secondary)] font-bold border-b-2 border-[var(--color-secondary)]"
-                : "text-gray-600 hover:text-gray-800"
-                }`}
-            >
-              User Sign up
-            </button>
+
             <button
               type="button"
               onClick={() => setActiveTab("business")}
@@ -118,6 +109,16 @@ const SignUpPage = () => {
                 }`}
             >
               Business Sign up
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("user")}
+              className={`flex-1 py-3 px-4 text-base font-medium transition-all duration-200 relative ${activeTab === "user"
+                ? "text-[var(--color-secondary)] font-bold border-b-2 border-[var(--color-secondary)]"
+                : "text-gray-600 hover:text-gray-800"
+                }`}
+            >
+              User Sign up
             </button>
           </div>
 
@@ -270,14 +271,14 @@ const SignUpPage = () => {
                         <span className="ml-2 text-sm text-[var(--color-text-muted)]">
                           I agree{" "}
                           <Link
-                            href="/terms"
+                            href="/terms-and-conditions"
                             className="text-[var(--color-secondary)] font-semibold underline"
                           >
                             Terms and conditions
                           </Link>{" "}
                           and{" "}
                           <Link
-                            href="/terms"
+                            href="/privacy-policy"
                             className="text-[var(--color-secondary)] font-semibold underline"
                           >
                             Privacy policy.

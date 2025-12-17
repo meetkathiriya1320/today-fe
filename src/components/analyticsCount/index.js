@@ -66,19 +66,10 @@ const AnalyticsCount = ({
           <h2 className="text-2xl md:text-5xl font-semibold leading-none">
             {count ?? "—"}
           </h2>
-          {growth && (
-            <div className="mb-1 ">
-              <GrowthBadge value={growth} />
-            </div>
-          )}
+
         </div>
 
-        {/* Edit/Delete (Optional) */}
-        {(onEdit || onDelete) && (
-          <div className="absolute top-4 right-4 flex items-center gap-2">
-            {/* Add your edit/delete buttons here if needed */}
-          </div>
-        )}
+
       </div>
     </div>
   );

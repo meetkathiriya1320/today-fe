@@ -59,9 +59,9 @@ const CategoryList = () => {
                     <span className="uppercase">Shop By</span>
                     <span className="uppercase text-[var(--color-secondary)]"> Categories</span>
                 </div>
-                <div className="flex md:hidden underline text-[var(--color-text-muted)]" onClick={() => router.push('/categories')}>View All</div>
+                {categoryList.length > 0 && <div className="flex md:hidden underline text-[var(--color-text-muted)]" onClick={() => router.push('/categories')}>View All</div>}
             </div>
-            <div className="overflow-hidden my-[50px]" ref={containerRef}>
+            {categoryList.length > 0 ? <div className="overflow-hidden my-[50px]" ref={containerRef}>
                 <div className={`flex ${isOverflow ? 'marquee' : ''}`}>
                     {/* Duplicate the list for seamless loop */}
                     {[...categoryList].map((item, index) => {
@@ -90,8 +90,8 @@ const CategoryList = () => {
 
                     })}
                 </div>
-            </div>
-            <div className="hidden md:block text-center my-5"> <Button label="View All" onClick={() => router.push('/categories')} /></div>
+            </div> : <p className="text-center text-gray-500 text-lg py-4">No categories available</p>}
+            {categoryList.length > 0 && <div className="hidden md:block text-center my-5"> <Button label="View All" onClick={() => router.push('/categories')} /></div>}
         </>
     )
 }
