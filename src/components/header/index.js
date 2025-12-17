@@ -24,6 +24,7 @@ import logo from "../../assets/logo.png";
 import Input from "../input";
 import Modal from "../modal";
 import NotificationDrawer from "../NotificationDrawer";
+import LoadingSpinner from "../loadingSpinner";
 
 const Header = () => {
 
@@ -31,6 +32,7 @@ const Header = () => {
   const user_location_data = getCookieItem("user_location")
   const user_loc_permission = getCookieItem("user_lat_lon")
   const [openMenu, setOpenMenu] = useState(false);
+
   const unreadCount = useSelector((state) => state.notification.unreadCount);
   const [openMobileNav, setOpenMobileNav] = useState(false);
   const [openNotificationDrawer, setOpenNotificationDrawer] = useState(false);
@@ -487,54 +489,55 @@ const Header = () => {
           </span>
         </div> */}
 
-        {apiCities.length > 0 ? <> <div className="py-4">
-          <Input
-            label="Select City"
-            isSelect
-            selectProps={{
-              options: apiCities,
-              placeholder: citiesLoading ? "Loading cities..." : "Select a city",
-              value: apiCities.find(o => o.value === selectedCityData.city),
-              onChange: onCitySelect
-            }}
-          />
-        </div>
+        {citiesLoading ? <div className="w-[100%] flex justify-center"> <LoadingSpinner /> </div> :
+          apiCities.length > 0 ? <> <div className="py-4">
+            <Input
+              label="Select City"
+              isSelect
+              selectProps={{
+                options: apiCities,
+                placeholder: citiesLoading ? "Loading cities..." : "Select a city",
+                value: apiCities.find(o => o.value === selectedCityData.city),
+                onChange: onCitySelect
+              }}
+            />
+          </div>
 
-          <div className="h-[1px] bg-[var(--divider-line)]" />
+            <div className="h-[1px] bg-[var(--divider-line)]" />
 
-          <div className="mt-4">
-            <h2 className="text-center text-[22px] font-[500] mb-4">
-              Popular Cities
-            </h2>
+            <div className="mt-4">
+              <h2 className="text-center text-[22px] font-[500] mb-4">
+                Popular Cities
+              </h2>
 
-            <div className="flex items-center justify-center">
+              <div className="flex items-center justify-center">
 
-              <div
-                className="flex overflow-x-auto space-x-4 md:space-x-7 px-4 md:px-8 py-4 scrollbar-hide"
-              >
-                {
-                  locations.map(({ value, label }, i) => (
-                    <div
-                      key={i}
-                      className="flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity"
-                      onClick={() => handleCitySelect({ value })}
-                    >
-                      <Image
-                        src={images[i]}
-                        alt={label}
-                        className="h-[60px] w-[60px] object-cover rounded-lg"
-                      />
-                      <span className="font-[500] text-[12px] mt-1">{label}</span>
-                    </div>
-                  ))
-                }
+                <div
+                  className="flex overflow-x-auto space-x-4 md:space-x-7 px-4 md:px-8 py-4 scrollbar-hide"
+                >
+                  {
+                    locations.map(({ value, label }, i) => (
+                      <div
+                        key={i}
+                        className="flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity"
+                        onClick={() => handleCitySelect({ value })}
+                      >
+                        <Image
+                          src={images[i]}
+                          alt={label}
+                          className="h-[60px] w-[60px] object-cover rounded-lg"
+                        />
+                        <span className="font-[500] text-[12px] mt-1">{label}</span>
+                      </div>
+                    ))
+                  }
+                </div >
+
               </div >
-
-            </div >
-          </div></> : <p className="text-[var(--color-text-muted)] font-bold mb-4 text-center py-4">
-          Currently, there are no offers running in any city today.
-          New offers may be added soon.
-        </p>}
+            </div></> : <p className="text-[var(--color-text-muted)] font-bold mb-4 text-center py-4">
+            Currently, there are no offers running in any city today.
+            New offers may be added soon.
+          </p>}
       </Modal >
 
       {/* MOBILE SIDE MENU */}
