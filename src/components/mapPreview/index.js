@@ -4,9 +4,9 @@ import React from 'react'
 
 const MapPreview = ({ business_lat, business_lng }) => {
 
-    const embedUrl = `https://www.google.com/maps?q=${business_lat},${business_lng}&z=15&output=embed`;
+    const embedUrl = `https://www.google.com/maps?q=${business_lat},${business_lng}&z=20&output=embed`;
     return (
-        <div className="w-full h-48 rounded-lg overflow-hidden border">
+        <div className="w-full h-100 rounded-lg overflow-hidden">
             <iframe
                 title="Business Location"
                 width="100%"

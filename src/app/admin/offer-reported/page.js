@@ -12,8 +12,10 @@ import { constructQueryParams } from "@/utils/constructQueryParams";
 import { Shield, ShieldX } from "lucide-react";
 import useDebounce from "@/hooks/useDebounce";
 import { useEffect, useState } from "react";
+import useSocket from "@/hooks/useSocket";
 
 const AdminOfferReportedPage = () => {
+    const socket = useSocket()
     const [reports, setReports] = useState([]);
     const [loading, setLoading] = useState(true);
     const [blockModalOpen, setBlockModalOpen] = useState(false);
@@ -260,6 +262,13 @@ const AdminOfferReportedPage = () => {
             });
 
             if (response.successType) {
+
+                const notificationData = response.response.data.notifications;
+                if (notificationData.data.length > 0) {
+                    socket.emit("send-notification-to-business-owner", {
+                        ...notificationData
+                    });
+                }
                 setBlockModalOpen(false);
                 setSelectedOffer(null);
                 setBlockReason("");

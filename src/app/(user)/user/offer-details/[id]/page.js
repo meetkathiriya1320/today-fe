@@ -202,7 +202,6 @@ const OfferDetails = ({ params }) => {
                                     <Button label="Report Offer" className="w-full mt-3" variant="outline" onClick={handleReportOffer} />
 
                                 </div>
-                                <MapPreview business_lat={Branch.latitude} business_lng={Branch.longitude} />
                             </div>
 
                         </div>
@@ -211,7 +210,7 @@ const OfferDetails = ({ params }) => {
                         <div className="h-[1px] bg-[var(--divider-line)] w-full lg:w-[70%] my-5" />
 
                         {/* Business Details + Tags */}
-                        <div className="mt-4 sm:mt-8 flex flex-col lg:flex-row gap-4 sm:gap-10">
+                        <div className="my-4 sm:my-8 flex flex-col lg:flex-row gap-4 sm:gap-10">
 
                             {/* Business Details */}
                             <div className="w-full lg:w-[70%]">
@@ -255,6 +254,7 @@ const OfferDetails = ({ params }) => {
                             </div>
 
                         </div>
+                        <MapPreview business_lat={Branch.latitude} business_lng={Branch.longitude} />
 
                     </div>
 
@@ -284,46 +284,39 @@ export default OfferDetails;
 
 export function openGoogleMapUsingLocData({
     business_latitude,
-    business_longitude
+    business_longitude,
 }) {
+    const fallbackUrl = `https://www.google.com/maps/dir/?api=1&destination=${business_latitude},${business_longitude}`;
+
     if (!navigator.geolocation) {
-        // Geolocation not supported
-        const url = `https://www.google.com/maps/dir/?api=1&destination=${business_latitude},${business_longitude}`;
-        window.open(url, "_blank");
+
+        window.open(fallbackUrl, "_blank");
         return;
     }
 
-    navigator.permissions.query({ name: "geolocation" })
-        .then(({ state }) => {
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+            const { latitude, longitude, accuracy } = pos.coords;
 
-            // ❌ Permission blocked
-            if (state === "denied") {
-                const url = `https://www.google.com/maps/dir/?api=1&destination=${business_latitude},${business_longitude}`;
-                window.open(url, "_blank");
+            // If location is too approximate → fallback
+            if (accuracy > 500) {
+                window.open(fallbackUrl, "_blank");
                 return;
             }
-
-            // ✅ Allowed or first-time → get user location
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    const url = `https://maps.google.com/?saddr=${pos.coords.latitude},${pos.coords.longitude}&daddr=${business_latitude},${business_longitude}`;
-                    window.open(url, "_blank");
-                },
-                (err) => {
-                    // ⚠️ Any error → fallback to business location
-                    const url = `https://www.google.com/maps/dir/?api=1&destination=${business_latitude},${business_longitude}`;
-                    window.open(url, "_blank");
-                    console.error("Location error:", err.message);
-                },
-                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-
-            );
-        })
-        .catch((err) => {
-            // Permissions API failed → fallback
-            const url = `https://www.google.com/maps/dir/?api=1&destination=${business_latitude},${business_longitude}`;
+            const url = `https://www.google.com/maps/dir/?api=1&origin=${latitude},${longitude}&destination=${business_latitude},${business_longitude}`;
             window.open(url, "_blank");
-            console.error("Permission check error:", err);
-        });
+        },
+        (error) => {
+            // Permission denied / timeout / unavailable
+            window.open(fallbackUrl, "_blank");
+            console.error("Geolocation error:", error.message);
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0,
+        }
+    );
 }
+
 

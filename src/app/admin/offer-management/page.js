@@ -1,7 +1,6 @@
 "use client";
 
 import ActionButton from "@/components/actionButton";
-import AddOfferModal from "@/components/admin/AddOfferModal";
 import Button from "@/components/button";
 import ConfirmationModal from "@/components/confirmationModal";
 import Input from "@/components/input";
@@ -11,11 +10,12 @@ import SectionHeader from "@/components/sectionHeader";
 import StatusChip from "@/components/statusChip";
 import Table from "@/components/table";
 import useDebounce from "@/hooks/useDebounce";
-import useSocket from "@/hooks/useSocket";
-import { deleteResponse, getResponse, putResponse } from "@/lib/response";
+import { getResponse, putResponse, deleteResponse } from "@/lib/response";
 import { constructQueryParams } from "@/utils/constructQueryParams";
-import { Building2, Calendar, CheckCircle, CircleX, Edit, Eye, MapPin, Plus, Shield, ShieldX, Tag, Trash2 } from "lucide-react";
+import { CheckCircle, CircleX, Plus, Trash2, Edit, Eye, EyeOff, MapPin, Calendar, Building2, User, Tag, ExternalLink, Shield, ShieldX } from "lucide-react";
 import { useEffect, useState } from "react";
+import AddOfferModal from "@/components/admin/AddOfferModal";
+import useSocket from "@/hooks/useSocket";
 
 const no_image = "/assets/noImage.png";
 
@@ -411,6 +411,10 @@ const AdminOfferManagementPage = () => {
       });
 
       if (response.successType) {
+        const notificationData = response.response.data.notifications
+        socket.emit("send-notification-to-business-owner", {
+          ...notificationData
+        });
         setBlockModalOpen(false);
         setSelectedOffer(null);
         setBlockReason("");
@@ -689,8 +693,7 @@ const AdminOfferManagementPage = () => {
           open={approveModalOpen}
           onCancel={() => setApproveModalOpen(false)}
           title="Approve Offer"
-          message={`Are you sure you want to approve the offer "${selectedOffer?.offer_title || ""
-            }" from "${selectedOffer?.Business?.business_name || ""}"?`}
+          message={`Are you sure you want to approve the offer "${selectedOffer?.offer_title || ""}" from "${selectedOffer?.Business?.business_name || ""}"?`}
           confirmButtonLabel="Approve"
           confirmButtonVariant="primary"
           onConfirm={handleApproveOffer}
@@ -709,9 +712,7 @@ const AdminOfferManagementPage = () => {
           <div className="space-y-4">
             <div>
               <p className="text-sm text-gray-600 mb-4">
-                Please provide a reason for rejecting the offer "
-                {selectedOffer?.offer_title || ""}" from "
-                {selectedOffer?.Branch?.Business?.business_name || ""}":
+                {`Please provide a reason for rejecting the offer "${selectedOffer?.offer_title || ""}" from "${selectedOffer?.Branch?.Business?.business_name || ""}":`}
               </p>
               <Input
                 isTextarea={true}
@@ -753,8 +754,7 @@ const AdminOfferManagementPage = () => {
           open={deleteModalOpen}
           onCancel={() => setDeleteModalOpen(false)}
           title="Delete Offer"
-          message={`Are you sure you want to delete the offer "${selectedOffer?.offer_title || ""
-            }"? This action cannot be undone.`}
+          message={`Are you sure you want to delete the offer "${selectedOffer?.offer_title || ""}"? This action cannot be undone.`}
           confirmButtonLabel="Delete"
           confirmButtonVariant="danger"
           onConfirm={handleDeleteOffer}
