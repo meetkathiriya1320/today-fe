@@ -3,10 +3,11 @@
 import Button from "@/components/button";
 import Input from "@/components/input";
 import LoadingSpinner from "@/components/loadingSpinner";
+import MapPreview from "@/components/mapPreview";
 import Modal from "@/components/modal";
 import { getRequest, postRequest } from "@/lib/axiosClient";
 import { setBreeadCrumb } from "@/store/slices/userSlice";
-import { getCurrentUserCookie } from "@/utils/cookieUtils";
+import { getCookieItem, getCurrentUserCookie } from "@/utils/cookieUtils";
 import { Calendar, House } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -20,6 +21,8 @@ const OfferDetails = ({ params }) => {
     const { id } = React.use(params)
 
     const isLoggedIn = getCurrentUserCookie()
+    // const user_lat_lon = getCookieItem("user_lat_lon");
+
     const [isModelOpen, setIsModelOpen] = useState("");
     const [reportNote, setReportNote] = useState("")
 
@@ -76,12 +79,9 @@ const OfferDetails = ({ params }) => {
     // open map funcation
     const handleOpenMap = () => {
 
-        const latitude = Branch.latitude;
-        const longitude = Branch.longitude;
-
-        const googleMapsUrl = `https://www.google.com/maps/dir/Current+Location/${latitude},${longitude}`;
-
-        window.open(googleMapsUrl, "_blank");
+        const business_latitude = Branch.latitude;
+        const business_longitude = Branch.longitude;
+        openGoogleMapUsingLocData({ business_latitude, business_longitude });
     }
 
     // report offer funcation 
@@ -198,10 +198,11 @@ const OfferDetails = ({ params }) => {
                                         </div>
                                     </div>
 
-                                    <Button label="View Location" className="w-full" onClick={() => handleOpenMap()} />
+                                    <Button label="View Location" className="w-full" onClick={(e) => handleOpenMap(e)} />
                                     <Button label="Report Offer" className="w-full mt-3" variant="outline" onClick={handleReportOffer} />
 
                                 </div>
+                                <MapPreview business_lat={Branch.latitude} business_lng={Branch.longitude} />
                             </div>
 
                         </div>
@@ -280,3 +281,49 @@ const OfferDetails = ({ params }) => {
 };
 
 export default OfferDetails;
+
+export function openGoogleMapUsingLocData({
+    business_latitude,
+    business_longitude
+}) {
+    if (!navigator.geolocation) {
+        // Geolocation not supported
+        const url = `https://www.google.com/maps/dir/?api=1&destination=${business_latitude},${business_longitude}`;
+        window.open(url, "_blank");
+        return;
+    }
+
+    navigator.permissions.query({ name: "geolocation" })
+        .then(({ state }) => {
+
+            // ❌ Permission blocked
+            if (state === "denied") {
+                const url = `https://www.google.com/maps/dir/?api=1&destination=${business_latitude},${business_longitude}`;
+                window.open(url, "_blank");
+                return;
+            }
+
+            // ✅ Allowed or first-time → get user location
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const url = `https://maps.google.com/?saddr=${pos.coords.latitude},${pos.coords.longitude}&daddr=${business_latitude},${business_longitude}`;
+                    window.open(url, "_blank");
+                },
+                (err) => {
+                    // ⚠️ Any error → fallback to business location
+                    const url = `https://www.google.com/maps/dir/?api=1&destination=${business_latitude},${business_longitude}`;
+                    window.open(url, "_blank");
+                    console.error("Location error:", err.message);
+                },
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+
+            );
+        })
+        .catch((err) => {
+            // Permissions API failed → fallback
+            const url = `https://www.google.com/maps/dir/?api=1&destination=${business_latitude},${business_longitude}`;
+            window.open(url, "_blank");
+            console.error("Permission check error:", err);
+        });
+}
+

@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import * as Yup from "yup";
+import SectionHeader from "@/components/sectionHeader";
 
 const ProfilePage = () => {
   const router = useRouter();
@@ -254,9 +255,11 @@ const ProfilePage = () => {
   return (
     <div className="min-h-screen p-4 sm:p-6">
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-3xl font-bold text-[var(--color-text-primary)] mb-8">
-          Profile Settings
-        </h1>
+
+        <SectionHeader
+          title="Profile Settings"
+          mainHeader
+        />
 
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar Navigation */}
@@ -284,7 +287,7 @@ const ProfilePage = () => {
             {/* Profile Section */}
             {activeSection === "profile" && (
               <div className="rounded-2xl shadow-xl p-6 sm:p-8">
-                <h2 className="text-2xl font-bold text-[var(--color-text-primary)] mb-6">
+                <h2 className="text-[16px] sm:text-xl md:text-2xl font-bold text-[var(--color-text-primary)] mb-6">
                   Personal Information
                 </h2>
 

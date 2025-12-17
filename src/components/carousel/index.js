@@ -35,7 +35,7 @@ const ImageCarousel = ({ images, alt = "carousel image", interval = 2000 }) => {
       <img
         src={no_image}
         alt={alt}
-        className="w-full h-full object-cover transition-all duration-700 ease-in-out"
+        className="w-full h-[200px] object-cover transition-all duration-700 ease-in-out"
       />
     );
   }

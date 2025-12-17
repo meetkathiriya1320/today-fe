@@ -4,7 +4,7 @@ import Button from "@/components/button";
 import Input from "@/components/input";
 import MultiImageUploader from "@/components/multiImageUploader";
 import { postResponse } from "@/lib/response";
-import { setCurrentUserCookie } from "@/utils/cookieUtils";
+import { clearCurrentUserCookie, getCurrentUserCookie, setCurrentUserCookie } from "@/utils/cookieUtils";
 import { Field, Form, Formik } from "formik";
 import { isValidPhoneNumber } from "libphonenumber-js";
 import { Building2, GitBranch, MapPin, Phone, User } from "lucide-react";
@@ -73,6 +73,20 @@ export default function BusinessDetailsPage() {
     });
 
     if (res.successType) {
+
+      // for logout current user ====
+      const current_user = getCurrentUserCookie()
+      if (current_user) {
+        await postResponse({
+          apiEndPoint: "auth/logout",
+          payload: {},
+          hideSuccessToast: true
+        });
+        // Remove user cookie
+        clearCurrentUserCookie();
+      }
+
+
       setCurrentUserCookie({
         ...res.response.data.user,
         ...res.response.data.business,

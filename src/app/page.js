@@ -20,15 +20,16 @@ const HomePage = () => {
     useEffect(() => {
         const fetchBanners = async () => {
             try {
+                let query = {}
                 if (userLocation?.city) {
-                    const query = {
+                    query = {
                         city: userLocation.city
                     }
-                    const queryString = constructQueryParams(query);
-                    const res = await getResponse({ apiEndPoint: "/advertise-requests/banners", queryString });
-                    if (res.successType && res.response.data.banners) {
-                        setBanners(res.response.data.banners);
-                    }
+                }
+                const queryString = constructQueryParams(query);
+                const res = await getResponse({ apiEndPoint: "/advertise-requests/banners", queryString });
+                if (res.successType && res.response.data.banners) {
+                    setBanners(res.response.data.banners);
                 }
             } catch (error) {
                 console.error("Error fetching banners:", error);

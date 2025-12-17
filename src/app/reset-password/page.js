@@ -1,14 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
-import Input from "@/components/input";
 import Button from "@/components/button";
-import { Lock, Eye, EyeOff } from "lucide-react";
-import { Formik, Form, Field } from "formik";
-import * as Yup from "yup";
+import Input from "@/components/input";
 import { postResponse } from "@/lib/response";
+import { Field, Form, Formik } from "formik";
+import { Eye, EyeOff, Lock } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { setCurrentUserCookie } from "@/utils/cookieUtils";
+import { useState } from "react";
+import * as Yup from "yup";
 
 // Yup validation schema
 const validationSchema = Yup.object({

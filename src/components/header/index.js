@@ -10,7 +10,7 @@ import {
   setCookieItem,
 } from "@/utils/cookieUtils";
 import axios from "axios";
-import { Bell, ChevronDown, MapPin, Menu, Shield, X } from "lucide-react";
+import { Bell, ChevronDown, MapPin, Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -19,16 +19,8 @@ import { useDispatch, useSelector } from "react-redux";
 import Ahmedabad from "../../assets/locations/Ahmedabad.png";
 import Bengaluru from "../../assets/locations/Bengaluru.png";
 import Chandigarh from "../../assets/locations/Chandigarh.png";
-import Chennai from "../../assets/locations/Chennai.png";
-import Delhi from "../../assets/locations/Delhi.png";
 import Hyderabad from "../../assets/locations/Hyderabad.png";
-import Kochi from "../../assets/locations/Kochi.png";
-import Kolkata from "../../assets/locations/Kolkata.png";
-import Mumbai from "../../assets/locations/Mumbai.png";
-import Pune from "../../assets/locations/Pune.png";
 import logo from "../../assets/logo.png";
-import AddressAutocomplete from "../addressAutocomplete";
-import Button from "../button";
 import Input from "../input";
 import Modal from "../modal";
 import NotificationDrawer from "../NotificationDrawer";
@@ -37,6 +29,7 @@ const Header = () => {
 
   const socket = useSocket()
   const user_location_data = getCookieItem("user_location")
+  const user_loc_permission = getCookieItem("user_lat_lon")
   const [openMenu, setOpenMenu] = useState(false);
   const unreadCount = useSelector((state) => state.notification.unreadCount);
   const [openMobileNav, setOpenMobileNav] = useState(false);
@@ -88,9 +81,9 @@ const Header = () => {
   // Navigation JSON - Admin routes
   const adminNavItems = [
     { label: "Dashboard", path: "/dashboard" },
-    { label: "Promotions", path: "/promotions" },
-    { label: "Offers", path: "/offers" },
-    { label: "Branch", path: "/branches" },
+    { label: "Promotions", path: "/admin/promotions" },
+    { label: "Offers", path: "/admin/offer-management" },
+    { label: "Business", path: "/admin/shop" },
     // {
     //   label: "Admin Panel",
     //   path: "/admin/dashboard",
@@ -158,8 +151,11 @@ const Header = () => {
         setCitiesLoading(true);
         const response = await getResponse({ apiEndPoint: "/business/city" });
         if (response.successType && response.response.data) {
-          const cities = response.response.data.map(city => ({ value: city, label: city }));
-          setApiCities(cities);
+          if (response.response.data.length > 0) {
+            const cities = response.response.data.map(city => ({ value: city, label: `${city.charAt(0).toUpperCase()}${city.slice(1)}` }));
+            setApiCities(cities);
+          }
+
         }
       } catch (error) {
         console.error("Error fetching cities:", error);
@@ -174,9 +170,10 @@ const Header = () => {
 
 
   const handleClose = () => {
-    if (user_location_data) {
-      dispatch(openLocationModal(false))
-    }
+    // if (user_location_data) {
+    console.log("first")
+    dispatch(openLocationModal(false))
+    // }
   }
 
   const onCitySelect = (selected) => {
@@ -185,17 +182,19 @@ const Header = () => {
     const locationData = { city }
     setCookieItem("user_location", locationData)
     dispatch(setLocation(locationData))
+    console.log("first1")
     dispatch(openLocationModal(false))
   }
 
   // Handle popular city selection
   const handleCitySelect = (loc_item) => {
 
-    const city = loc_item.label
+    const city = loc_item.value
     setSelectedCityData({ city })
     const locationData = { city }
     setCookieItem("user_location", locationData)
     dispatch(setLocation(locationData))
+    console.log("first2")
     dispatch(openLocationModal(false))
   }
 
@@ -216,39 +215,30 @@ const Header = () => {
     return data
   }
 
-  // ditect user location 
-  const handleGetLocation = async () => {
-    if (!navigator.geolocation) {
-      alert("Geolocation not supported by your browser.");
-      return;
+  // // ditect user location 
+  // const handleGetLocation = async () => {
+  //   if (!navigator.geolocation) {
+  //     alert("Geolocation not supported by your browser.");
+  //     return;
+  //   }
+  //   await navigator.permissions.query({
+  //     name: "geolocation"
+  //   });
+  // }
+
+  // useEffect(() => {
+  //   handleGetLocation()
+  // }, [])
+
+  useEffect(() => {
+
+    // default model open manage
+    if (apiCities.length === 0) {
+      dispatch(openLocationModal(false))
+    } else {
+      dispatch(openLocationModal(true))
     }
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
-
-
-        const formatted = await getUserLocationName(lat, lon)
-        const data = {
-          lat,
-          lon,
-          formatted: formatted
-        }
-        // Store in cookies
-        setCookieItem("user_location", data);
-        dispatch(setLocation(data))
-
-        alert("Location permission granted!");
-        dispatch(openLocationModal(false))
-      },
-      (error) => {
-        console.error(error);
-        alert("User denied location or an error occurred.");
-      }
-    );
-  }
+  }, [apiCities])
 
 
   // Fetch unread notification count
@@ -336,17 +326,17 @@ const Header = () => {
         {/* RIGHT SIDE */}
         <div className="flex items-center space-x-3 md:space-x-4 lg:space-x-6">
           {/* Location Display */}
-          {userLocation && (user.role === "user" || Object.keys(user).length === 0) && (
-            <div className="flex items-center space-x-2 text-[var(--color-text-primary)]">
-              <div className="p-2 md:p-2 lg:p-3 cursor-pointer rounded-[10px] flex items-center justify-center" onClick={() => dispatch(openLocationModal(true))} style={{ backgroundColor: 'var(--color-primary)' }}>
-                <MapPin className="w-5 h-5 md:w-5 md:h-5 lg:w-6 lg:h-6 text-[var(--color-secondary)]" />
-              </div>
-              <div className="hidden md:flex flex-col">
-                <span className="text-xs md:text-xs lg:text-sm text-[var(--color-text-muted)]">Location</span>
-                <span className="text-xs md:text-sm font-medium">{`${userLocation.city.at(0).toUpperCase()}${userLocation.city.slice(1)}`}</span>
-              </div>
+
+          <div className="flex cursor-pointer items-center space-x-2 text-[var(--color-text-primary)]" onClick={() => dispatch(openLocationModal(true))}>
+            <div className="p-2 md:p-2 lg:p-3 cursor-pointer rounded-[10px] flex items-center justify-center" style={{ backgroundColor: 'var(--color-primary)' }}>
+              <MapPin className="w-5 h-5 md:w-5 md:h-5 lg:w-6 lg:h-6 text-[var(--color-secondary)]" />
             </div>
-          )}
+            {userLocation && <div className="hidden md:flex flex-col">
+              <span className="text-xs md:text-xs lg:text-sm text-[var(--color-text-muted)]">Location</span>
+              <span className="text-xs md:text-sm font-medium">{`${userLocation.city.at(0).toUpperCase()}${userLocation.city.slice(1)}`}</span>
+            </div>}
+          </div>
+
 
           {/* Admin Badge for non-admin routes */}
           {/* {user.role === "admin" && !pathname.startsWith("/admin/") && (
@@ -414,13 +404,19 @@ const Header = () => {
                     {user.role === "admin" ? "Administrator" : user.role === "business_owner" ? "Business Owner" : "User"}
                   </p>
                 </div>
-
+                <div className="bg-[var(--color-text-muted)] h-[1px] w-[100%]" />
                 <button
                   onClick={() => router.push("/profile")}
                   className="w-full cursor-pointer text-left px-4 py-2 hover:bg-gray-50 text-[var(--color-text-primary)] font-medium"
                 >
                   Profile
                 </button>
+                {user.role === "user" && <button
+                  onClick={() => router.push("/sign-up")}
+                  className="w-full cursor-pointer text-left px-4 py-2 hover:bg-gray-50 text-[var(--color-text-primary)] font-medium"
+                >
+                  <span>Become a Business</span>
+                </button>}
 
                 {/* {user.role === "admin" && (
                   <button
@@ -444,18 +440,19 @@ const Header = () => {
             /* Login Buttons for non-logged in users */
             /* Login Buttons for non-logged in users (Desktop) */
             <div className="hidden lg:flex items-center space-x-3">
+
+              <Link
+                href="/sign-up"
+                className="px-3 py-1.5 md:px-4 md:py-2 bg-[var(--color-primary)] text-[var(--color-secondary)] font-medium rounded-lg hover:bg-opacity-90 transition text-xs md:text-sm border border-[var(--color-secondary)]"
+              >
+                Business Registration
+              </Link>
               <Link
                 href="/login"
                 className="px-3 py-1.5 md:px-4 md:py-2 bg-[var(--color-secondary)] text-white font-medium rounded-lg hover:bg-opacity-90 transition text-xs md:text-sm"
               >
                 Login
               </Link>
-              {/* <Link
-                href="/login?role=business_owner"
-                className="px-3 py-1.5 md:px-4 md:py-2 bg-[var(--color-primary)] text-[var(--color-secondary)] font-medium rounded-lg hover:bg-opacity-90 transition text-xs md:text-sm border border-[var(--color-secondary)]"
-              >
-                Login Business Owner
-              </Link> */}
             </div>
           )}
         </div>
@@ -465,21 +462,22 @@ const Header = () => {
       {!is_logged_in_user && (
         <div className="lg:hidden flex items-center justify-end space-x-3 pb-4 px-4 md:px-6">
           <Link
+            href="/sign-up"
+            className="px-3 py-1.5 md:px-4 md:py-2 bg-[var(--color-primary)] text-[var(--color-secondary)] font-medium rounded-lg hover:bg-opacity-90 transition text-xs md:text-sm border border-[var(--color-secondary)]"
+          >
+            Business Registration
+          </Link>
+          <Link
             href="/login"
-            className="px-4 py-2 bg-[var(--color-secondary)] text-white font-medium rounded-lg text-center hover:bg-opacity-90 transition text-sm"
+            className="px-3 py-1.5 md:px-4 md:py-2 bg-[var(--color-secondary)] text-white font-medium rounded-lg text-center hover:bg-opacity-90 transition text-sm"
           >
             Login
           </Link>
-          {/* <Link
-            href="/login?role=business_owner"
-            className="px-4 py-2 bg-[var(--color-primary)] text-[var(--color-secondary)] font-medium rounded-lg text-center hover:bg-opacity-90 transition text-sm border border-[var(--color-secondary)]"
-          >
-            Login Business Owner
-          </Link> */}
+
         </div>
       )}
 
-      <Modal open={openModel} closeModal={handleClose} title="Select Your Location" width="w-full md:w-[900px]">
+      <Modal open={openModel} closeButtonOutside closeModal={handleClose} title={apiCities.length > 0 ? "Select Your City" : "No Active Offers Today"} width="w-full md:w-[900px]">
 
         {/* @todo =================== after get API using lat-log get city, country, stae===============*/}
         {/* <div className="p-3 rounded-xl bg-[var(--color-primary)]">
@@ -489,7 +487,7 @@ const Header = () => {
           </span>
         </div> */}
 
-        <div className="py-4">
+        {apiCities.length > 0 ? <> <div className="py-4">
           <Input
             label="Select City"
             isSelect
@@ -502,38 +500,41 @@ const Header = () => {
           />
         </div>
 
-        <div className="h-[1px] bg-[var(--divider-line)]" />
+          <div className="h-[1px] bg-[var(--divider-line)]" />
 
-        <div className="mt-4">
-          <h2 className="text-center text-[22px] font-[500] mb-4">
-            Popular Cities
-          </h2>
+          <div className="mt-4">
+            <h2 className="text-center text-[22px] font-[500] mb-4">
+              Popular Cities
+            </h2>
 
-          <div className="flex items-center justify-center">
+            <div className="flex items-center justify-center">
 
-            <div
-              className="flex overflow-x-auto space-x-4 md:space-x-7 px-4 md:px-8 py-4 scrollbar-hide"
-            >
-              {
-                locations.map(({ label }, i) => (
-                  <div
-                    key={i}
-                    className="flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity"
-                    onClick={() => handleCitySelect({ label })}
-                  >
-                    <Image
-                      src={images[i]}
-                      alt={label}
-                      className="h-[60px] w-[60px] object-cover rounded-lg"
-                    />
-                    <span className="font-[500] text-[12px] mt-1">{label}</span>
-                  </div>
-                ))
-              }
+              <div
+                className="flex overflow-x-auto space-x-4 md:space-x-7 px-4 md:px-8 py-4 scrollbar-hide"
+              >
+                {
+                  locations.map(({ value, label }, i) => (
+                    <div
+                      key={i}
+                      className="flex flex-col items-center cursor-pointer hover:opacity-80 transition-opacity"
+                      onClick={() => handleCitySelect({ value })}
+                    >
+                      <Image
+                        src={images[i]}
+                        alt={label}
+                        className="h-[60px] w-[60px] object-cover rounded-lg"
+                      />
+                      <span className="font-[500] text-[12px] mt-1">{label}</span>
+                    </div>
+                  ))
+                }
+              </div >
+
             </div >
-
-          </div >
-        </div >
+          </div></> : <p className="text-[var(--color-text-muted)] font-bold mb-4 text-center py-4">
+          Currently, there are no offers running in any city today.
+          New offers may be added soon.
+        </p>}
       </Modal >
 
       {/* MOBILE SIDE MENU */}
@@ -644,6 +645,12 @@ const Header = () => {
                     >
                       <span>Profile</span>
                     </button>
+                    {user.role === "user" && <button
+                      onClick={() => router.push("/sign-up")}
+                      className="w-full cursor-pointer text-left px-4 py-2 hover:bg-gray-50 text-[var(--color-text-primary)] font-medium"
+                    >
+                      <span>Become a Business</span>
+                    </button>}
                     <button
                       onClick={() => {
                         setOpenMobileNav(false);
