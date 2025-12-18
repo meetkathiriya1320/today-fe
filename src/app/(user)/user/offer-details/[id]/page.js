@@ -7,8 +7,8 @@ import MapPreview from "@/components/mapPreview";
 import Modal from "@/components/modal";
 import { getRequest, postRequest } from "@/lib/axiosClient";
 import { setBreeadCrumb } from "@/store/slices/userSlice";
-import { getCookieItem, getCurrentUserCookie } from "@/utils/cookieUtils";
-import { Calendar, House } from "lucide-react";
+import { getCurrentUserCookie } from "@/utils/cookieUtils";
+import { Calendar } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -282,15 +282,52 @@ const OfferDetails = ({ params }) => {
 
 export default OfferDetails;
 
+// export function openGoogleMapUsingLocData({
+//     business_latitude,
+//     business_longitude,
+// }) {
+//     const fallbackUrl = `https://www.google.com/maps/dir/?api=1&destination=${business_latitude},${business_longitude}`;
+
+//     if (!navigator.geolocation) {
+
+//         window.open(fallbackUrl, "_blank");
+//         return;
+//     }
+
+//     navigator.geolocation.getCurrentPosition(
+//         (pos) => {
+//             const { latitude, longitude, accuracy } = pos.coords;
+
+//             // If location is too approximate → fallback
+//             if (accuracy > 500) {
+//                 window.open(fallbackUrl, "_blank");
+//                 return;
+//             }
+//             const url = `https://www.google.com/maps/dir/?api=1&origin=${latitude},${longitude}&destination=${business_latitude},${business_longitude}`;
+//             window.open(url, "_blank");
+//         },
+//         (error) => {
+//             // Permission denied / timeout / unavailable
+//             window.open(fallbackUrl, "_blank");
+//             console.error("Geolocation error:", error.message);
+//         },
+//         {
+//             enableHighAccuracy: true,
+//             timeout: 15000,
+//             maximumAge: 0,
+//         }
+//     );
+// }
+
 export function openGoogleMapUsingLocData({
     business_latitude,
     business_longitude,
 }) {
-    const fallbackUrl = `https://www.google.com/maps/dir/?api=1&destination=${business_latitude},${business_longitude}`;
+    // 👉 Only business location (NO directions)
+    const locationOnlyUrl = `https://www.google.com/maps?q=${business_latitude},${business_longitude}`;
 
     if (!navigator.geolocation) {
-
-        window.open(fallbackUrl, "_blank");
+        window.open(locationOnlyUrl, "_blank");
         return;
     }
 
@@ -298,18 +335,19 @@ export function openGoogleMapUsingLocData({
         (pos) => {
             const { latitude, longitude, accuracy } = pos.coords;
 
-            // If location is too approximate → fallback
+            // If location is too approximate → open only business location
             if (accuracy > 500) {
-                window.open(fallbackUrl, "_blank");
+                window.open(locationOnlyUrl, "_blank");
                 return;
             }
-            const url = `https://www.google.com/maps/dir/?api=1&origin=${latitude},${longitude}&destination=${business_latitude},${business_longitude}`;
-            window.open(url, "_blank");
+
+            // ✅ Location allowed → show directions
+            const directionUrl = `https://www.google.com/maps/dir/?api=1&origin=${latitude},${longitude}&destination=${business_latitude},${business_longitude}`;
+            window.open(directionUrl, "_blank");
         },
-        (error) => {
-            // Permission denied / timeout / unavailable
-            window.open(fallbackUrl, "_blank");
-            console.error("Geolocation error:", error.message);
+        () => {
+            // ❌ Permission denied / error → open only business location
+            window.open(locationOnlyUrl, "_blank");
         },
         {
             enableHighAccuracy: true,
@@ -318,5 +356,6 @@ export function openGoogleMapUsingLocData({
         }
     );
 }
+
 
 
